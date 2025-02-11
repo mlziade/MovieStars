@@ -81,9 +81,127 @@ function queryMyAnimeList(query) {
     });
 }
 
+function getImdbRating(id) {
+    return new Promise((resolve, reject) => {
+        const finalUrl = `https://www.imdb.com/title/${id}/`;
+        const fetchOptions = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            }
+        };
+
+        fetch(finalUrl, fetchOptions)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error while fetching content of ${finalUrl} ` + response.status);
+                }
+                return response.text();
+            })
+            .then(html => {
+                // Extract the rating data from the html content using regex
+                const regex = /"aggregateRating"\s*:\s*\{\s*"@type"\s*:\s*"AggregateRating"\s*,\s*"ratingCount"\s*:\s*(\d+)\s*,\s*"bestRating"\s*:\s*(\d+)\s*,\s*"worstRating"\s*:\s*(\d+)\s*,\s*"ratingValue"\s*:\s*([\d.]+)\s*\}/;
+                const match = html.match(regex);
+
+                if (match) {
+                    const ratingData = {
+                        ratingCount: parseInt(match[1], 10),
+                        bestRating: parseInt(match[2], 10),
+                        worstRating: parseInt(match[3], 10),
+                        ratingValue: parseFloat(match[4]),
+                    };
+                    resolve(ratingData);
+                } else {
+                    reject("Rating data not found for id " + id);
+                }
+            })
+            .catch(error => {
+                reject(error);
+            });
+    });
+}
+
+function queryImdb(query) {
+    return new Promise((resolve, reject) => {
+        const finalUrl = `https://www.imdb.com/find/?q=${query}&ref_=nv_sr_sm`;
+        const fetchOptions = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            }
+        };
+
+        fetch(finalUrl, fetchOptions)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error while fetching content of ${finalUrl} ` + response.status);
+                }
+                return response.text();
+            })
+            .then(html => {
+                const doc = new DOMParser().parseFromString(html, "text/html");
+
+                // Create a query result object
+                const queryResult = {
+                    animes: []
+                }
+
+                // Select the script with id "__NEXT_DATA__"
+                const imdbScriptNextData = doc.getElementById("__NEXT_DATA__").textContent;
+                const imdbQueryData = JSON.parse(imdbScriptNextData);
+
+                const idbmQueryResults = imdbQueryData.props.pageProps.titleResults.results;
+
+                for (const result of idbmQueryResults) {
+                    const title = result.titleNameText;
+                    const id = result.id;
+                    const image = result.titlePosterImageModel?.url;
+                    const score = ""
+
+                    queryResult.animes.push({
+                        id,
+                        title,
+                        image,
+                        score,
+                        levenshteinScore: levenshteinDistance(query, title),
+                    });
+                }
+
+                // Find the best match based on the lowest levenshtein score
+                const bestMatch = queryResult.animes.filter(anime => anime.levenshteinScore === Math.min(...queryResult.animes.map(anime => anime.levenshteinScore)))[0];
+
+                // Get the IMDB rating of the best match
+                getImdbRating(bestMatch.id).then((rating) => {
+                    bestMatch.score = rating.ratingValue;
+                    delete bestMatch.id;
+                    // Return the best match with IMDB rating updated
+                    resolve(bestMatch);
+                }).catch((error) => {
+                    console.error(error);
+                    reject(error);
+                });
+
+
+            })
+            .catch(error => {
+                reject(error);
+            });
+    })
+};
+
 document.addEventListener('DOMContentLoaded', function () {
+    // Add event listener to the button with id "myAnimeList"
     document.getElementById('myAnimeList').addEventListener('click', function () {
         queryMyAnimeList("Dr Stone").then((data) => {
+            console.log(data);
+        }).catch((error) => {
+            console.error(error);
+        });
+    });
+
+    // Add event listener to the button with id "imdb"
+    document.getElementById('imdb').addEventListener('click', function () {
+        queryImdb("Dr Stone").then((data) => {
             console.log(data);
         }).catch((error) => {
             console.error(error);
