@@ -5,8 +5,8 @@
   "description": "",
   "permissions": [
     "activeTab",
-    "storage",
-    "scripting"
+    "scripting",
+    "tabs"
   ],
   "action": {
     "default_popup": "htmls/popup.html",
