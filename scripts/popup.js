@@ -153,6 +153,18 @@ function getImdbRating(id) {
     });
 }
 
+/**
+ * Queries IMDb for a given search term and returns the best match with its IMDb rating.
+ *
+ * @param {string} query - The search term to query IMDb.
+ * @returns {Promise<Object>} A promise that resolves to an object containing the best match with its IMDb rating.
+ * @property {string} title - The title of the best match.
+ * @property {string} image - The URL of the image of the best match.
+ * @property {string} score - The IMDb rating of the best match.
+ * @property {number} levenshteinScore - The Levenshtein distance score between the query and the title.
+ *
+ * @throws {Error} If there is an HTTP error while fetching content from IMDb or if there is an error parsing the response.
+ */
 function queryImdb(query) {
     return new Promise((resolve, reject) => {
         const finalUrl = `https://www.imdb.com/find/?q=${query}&ref_=nv_sr_sm`;
@@ -171,22 +183,25 @@ function queryImdb(query) {
                 return response.text();
             })
             .then(html => {
-                const doc = new DOMParser().parseFromString(html, "text/html");
-
                 // Create a query result object
                 const queryResult = {
                     animes: []
                 }
 
-                // Select the script with id "__NEXT_DATA__"
+                // Parse the HTML content of the search results page using DOMParser
+                const doc = new DOMParser().parseFromString(html, "text/html");
+
+                // Select the script with id "__NEXT_DATA__" as a JSON object
                 const imdbScriptNextData = doc.getElementById("__NEXT_DATA__").textContent;
                 const imdbQueryData = JSON.parse(imdbScriptNextData);
 
+                // Extract the title results from the JSON object
                 const idbmQueryResults = imdbQueryData.props.pageProps.titleResults.results;
 
+                // Loop through the shows entries and extract: id, title, image (if available), and set empty score
                 for (const result of idbmQueryResults) {
-                    const title = result.titleNameText;
                     const id = result.id;
+                    const title = result.titleNameText;
                     const image = result.titlePosterImageModel?.url;
                     const score = ""
 
@@ -205,14 +220,13 @@ function queryImdb(query) {
                 // Get the IMDB rating of the best match
                 getImdbRating(bestMatch.id).then((rating) => {
                     bestMatch.score = rating.ratingValue;
-                    delete bestMatch.id;
-                    // Return the best match with IMDB rating updated
-                    resolve(bestMatch);
+                    delete bestMatch.id; // Remove the IMDB id from the final result
+
+                    resolve(bestMatch);  // Return the best match with IMDB rating updated
                 }).catch((error) => {
                     console.error(error);
                     reject(error);
                 });
-
 
             })
             .catch(error => {
