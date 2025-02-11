@@ -120,6 +120,7 @@ function getImdbRating(id) {
             method: "GET",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
+                "cookie": "lc-main=en_US",
             }
         };
 
@@ -144,7 +145,14 @@ function getImdbRating(id) {
                     };
                     resolve(ratingData);
                 } else {
-                    reject("Rating data not found for id " + id);
+                    const ratingData = {
+                        ratingCount: null,
+                        bestRating: null,
+                        worstRating: null,
+                        ratingValue: null,
+                    };
+                    resolve(ratingData);
+                    console.log("Rating data not found for IMDb ID:", id);
                 }
             })
             .catch(error => {
@@ -219,7 +227,7 @@ function queryImdb(query) {
 
                 // Get the IMDB rating of the best match
                 getImdbRating(bestMatch.id).then((rating) => {
-                    bestMatch.score = rating.ratingValue;
+                    bestMatch.score = rating.ratingValue ? rating.ratingValue : "N/A";
                     delete bestMatch.id; // Remove the IMDB id from the final result
 
                     resolve(bestMatch);  // Return the best match with IMDB rating updated
