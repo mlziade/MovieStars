@@ -35,7 +35,7 @@ function levenshteinDistance(stringA, stringB) {
         }
     }
 
-    return matrix[b.length][a.length];
+    return matrix[stringB.length][stringA.length];
 }
 
 /**
@@ -236,19 +236,24 @@ function queryImdb(query) {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Add event listener to the button with id "myAnimeList"
-    document.getElementById('myAnimeList').addEventListener('click', function () {
-        queryMyAnimeList("Dr Stone").then((data) => {
+    const imdbInfo = document.getElementById('imdb');
+    const malInfo = document.getElementById('myAnimeList');
+
+    // Load seriesTitle from local storage and then perform queries directly
+    chrome.storage.local.get("seriesTitle", (result) => {
+        const seriesTitle = result.seriesTitle;
+        console.log("Updated seriesTitle:", seriesTitle);
+
+        queryImdb(seriesTitle).then((data) => {
             console.log(data);
+            imdbInfo.textContent = JSON.stringify(data, null, 2);
         }).catch((error) => {
             console.error(error);
         });
-    });
 
-    // Add event listener to the button with id "imdb"
-    document.getElementById('imdb').addEventListener('click', function () {
-        queryImdb("Dr Stone").then((data) => {
+        queryMyAnimeList(seriesTitle).then((data) => {
             console.log(data);
+            malInfo.textContent = JSON.stringify(data, null, 2);
         }).catch((error) => {
             console.error(error);
         });

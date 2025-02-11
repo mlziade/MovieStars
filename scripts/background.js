@@ -27,9 +27,13 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
                         const urlSplit = url.split('/');
                         if (urlSplit.includes('series')) {
                             const length = urlSplit.length;
-                            return normalizeNameCrunchyroll(urlSplit[length - 1]);
+                            const normalizedTitle = normalizeNameCrunchyroll(urlSplit[length - 1]);
+                            chrome.storage.local.set({ seriesTitle: normalizedTitle }, () => {
+                                console.log("Updated seriesTitle:", normalizedTitle);
+                            });
+                            return normalizedTitle;
                         }
-                        // Extract series from Crunchyroll watch page
+                    // Extract series from Crunchyroll watch page
                     } else if (url.includes('/watch')) {
                         // Run the extraction code in the tab context where DOMParser is defined.
                         chrome.scripting.executeScript({
@@ -43,8 +47,12 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
                                 return seriesTitle ? seriesTitle.textContent.trim() : null;
                             }
                         }, (results) => {
-                            if (results && results[0]) {
-                                // console.log("Series /watch: " + results[0].result);
+                            if (results && results[0] && results[0].result) {
+                                const normalizedTitle = normalizeNameCrunchyroll(results[0].result);
+                                chrome.storage.local.set({ seriesTitle: normalizedTitle }, () => {
+                                    console.log("Updated seriesTitle:", normalizedTitle);
+                                });
+                                return normalizedTitle;
                             }
                         });
                     }
@@ -54,6 +62,7 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
             }
         }
     });
+    return;
 });
 
 function extractDomain(url) {
