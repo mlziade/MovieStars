@@ -38,6 +38,13 @@ function levenshteinDistance(stringA, stringB) {
     return matrix[b.length][a.length];
 }
 
+/**
+ * Queries MyAnimeList for a given search term and returns the best matching anime.
+ *
+ * @param {string} query - The search term to query MyAnimeList.
+ * @returns {Promise<Object>} A promise that resolves to an object containing the best matching anime's title, image, score, and levenshtein score.
+ * @throws {Error} If there is an HTTP error or any other issue during the fetch operation.
+ */
 function queryMyAnimeList(query) {
     return new Promise((resolve, reject) => {
         const finalUrl = `https://myanimelist.net/search/all?q=${query}&cat=all`;
@@ -56,26 +63,28 @@ function queryMyAnimeList(query) {
                 return response.text();
             })
             .then(html => {
-                const doc = new DOMParser().parseFromString(html, "text/html");
-                // Select all divs with class "list di-t w100"
-                const animeListDivs = doc.querySelectorAll("div.list.di-t.w100");
-
                 // Create a query result object
                 const queryResult = {
                     animes: []
                 }
 
-                // Loop through the first 10 anime entry
+                // Parse the HTML content of the search results page using DOMParser
+                const doc = new DOMParser().parseFromString(html, "text/html");
+
+                // Select all divs with class "list di-t w100", which contain the anime entries
+                const animeListDivs = doc.querySelectorAll("div.list.di-t.w100");
+
+                // Loop through the first 10 anime entry (that is the default page size) and extract the title, image, and score
                 const counter = 0;
                 for (let i = 0; i < 10; i++) {
 
                     const title = animeListDivs[i].querySelector(".title a")?.textContent.trim();
-                    const image = animeListDivs[i].querySelector(".picSurround a img")?.getAttribute("data-src");
+                    const imageUrl = animeListDivs[i].querySelector(".picSurround a img")?.getAttribute("data-src");
                     const score = animeListDivs[i].querySelector(".pt8")?.innerHTML.match(/Scored (\d+\.\d+)/)?.[1];
 
                     queryResult.animes.push({
                         title,
-                        image,
+                        image: imageUrl,
                         score,
                         levenshteinScore: levenshteinDistance(query, title),
                     });
