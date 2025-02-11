@@ -101,6 +101,18 @@ function queryMyAnimeList(query) {
     });
 }
 
+/**
+ * Fetches the IMDb rating data for a given movie or TV show ID.
+ *
+ * @param {string} id - The IMDb ID of the movie or TV show.
+ * @returns {Promise<Object>} A promise that resolves to an object containing the rating data:
+ * - `ratingCount` {number}: The number of ratings.
+ * - `bestRating` {number}: The highest possible rating.
+ * - `worstRating` {number}: The lowest possible rating.
+ * - `ratingValue` {number}: The average rating value.
+ *
+ * @throws {Error} If there is an HTTP error or if the rating data is not found.
+ */
 function getImdbRating(id) {
     return new Promise((resolve, reject) => {
         const finalUrl = `https://www.imdb.com/title/${id}/`;
