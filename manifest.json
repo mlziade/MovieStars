@@ -8,6 +8,9 @@
     "scripting",
     "tabs"
   ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "action": {
     "default_popup": "htmls/popup.html",
     "default_icon": "assets/icon.png"
