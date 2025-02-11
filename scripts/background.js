@@ -2,68 +2,82 @@ chrome.runtime.onInstalled.addListener(() => {
     console.log("Extension Installed");
 });
 
-chrome.tabs.onActivated.addListener((activeInfo) => {
-    chrome.tabs.get(activeInfo.tabId, (activeTab) => {
-        // Ensure we have a valid tab
-        if (activeTab && activeTab.url) {
-            const domain = extractDomain(activeTab.url);
-            // console.log("Domain: " + domain);
+function handleTabUpdate(tabId, changeInfo, tab) {
+    if (changeInfo.url) {
+        processTab(tab);
+    }
+}
 
-            switch (domain) {
-                case 'play.max.com':
-                    console.log("HBO Max");
-                    break;
-                case 'www.netflix.com':
-                    console.log("Netflix");
-                    break;
-                case 'www.crunchyroll.com':
-                    console.log("Crunchyroll");
+function handleTabActivated(activeInfo) {
+    chrome.tabs.get(activeInfo.tabId, (tab) => {
+        processTab(tab);
+    });
+}
 
-                    const url = activeTab.url;
-                    // console.log("URL: " + url);
+function processTab(activeTab) {
+    // Ensure we have a valid tab
+    if (activeTab && activeTab.url) {
+        const domain = extractDomain(activeTab.url);
+        // console.log("Domain: " + domain);
 
-                    // Extract series from Crunchyroll series page
-                    if (url.includes('/series')) {
-                        const urlSplit = url.split('/');
-                        if (urlSplit.includes('series')) {
-                            const length = urlSplit.length;
-                            const normalizedTitle = normalizeNameCrunchyroll(urlSplit[length - 1]);
+        switch (domain) {
+            case 'play.max.com':
+                console.log("HBO Max");
+                break;
+            case 'www.netflix.com':
+                console.log("Netflix");
+                break;
+            case 'www.crunchyroll.com':
+                console.log("Crunchyroll");
+
+                const url = activeTab.url;
+                console.log("URL: " + url);
+
+                // Extract series from Crunchyroll series page
+                if (url.includes('/series')) {
+                    const urlSplit = url.split('/');
+                    if (urlSplit.includes('series')) {
+                        const length = urlSplit.length;
+                        const normalizedTitle = normalizeNameCrunchyroll(urlSplit[length - 1]);
+                        chrome.storage.local.set({ seriesTitle: normalizedTitle }, () => {
+                            // console.log("Updated seriesTitle:", normalizedTitle);
+                        });
+                        return normalizedTitle;
+                    }
+                    // Extract series from Crunchyroll watch page
+                } else if (url.includes('/watch')) {
+                    // Run the extraction code in the tab context where DOMParser is defined.
+                    chrome.scripting.executeScript({
+                        target: { tabId: activeTab.id },
+                        func: () => {
+                            // console.log("Extracting series from /watch page");
+                            const htmlContent = document.documentElement.innerHTML;
+                            const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
+                            const currentMediaParentRef = doc.querySelector("div.current-media-parent-ref");
+                            const seriesTitle = currentMediaParentRef ? currentMediaParentRef.querySelector("a.show-title-link h4") : null;
+                            return seriesTitle ? seriesTitle.textContent.trim() : null;
+                        }
+                    }, (results) => {
+                        if (results && results[0] && results[0].result) {
+                            const normalizedTitle = normalizeNameCrunchyroll(results[0].result);
                             chrome.storage.local.set({ seriesTitle: normalizedTitle }, () => {
-                                console.log("Updated seriesTitle:", normalizedTitle);
+                                // console.log("Updated seriesTitle:", normalizedTitle);
                             });
                             return normalizedTitle;
                         }
-                    // Extract series from Crunchyroll watch page
-                    } else if (url.includes('/watch')) {
-                        // Run the extraction code in the tab context where DOMParser is defined.
-                        chrome.scripting.executeScript({
-                            target: { tabId: activeTab.id },
-                            func: () => {
-                                // console.log("Extracting series from /watch page");
-                                const htmlContent = document.documentElement.innerHTML;
-                                const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
-                                const currentMediaParentRef = doc.querySelector("div.current-media-parent-ref");
-                                const seriesTitle = currentMediaParentRef ? currentMediaParentRef.querySelector("a.show-title-link h4") : null;
-                                return seriesTitle ? seriesTitle.textContent.trim() : null;
-                            }
-                        }, (results) => {
-                            if (results && results[0] && results[0].result) {
-                                const normalizedTitle = normalizeNameCrunchyroll(results[0].result);
-                                chrome.storage.local.set({ seriesTitle: normalizedTitle }, () => {
-                                    console.log("Updated seriesTitle:", normalizedTitle);
-                                });
-                                return normalizedTitle;
-                            }
-                        });
-                    }
-                    break;
-                default:
-                    break;
-            }
+                    });
+                }
+                break;
+            default:
+                break;
         }
-    });
+    }
     return;
-});
+}
+
+chrome.tabs.onActivated.addListener(handleTabActivated);
+
+chrome.tabs.onUpdated.addListener(handleTabUpdate);
 
 function extractDomain(url) {
     if (!url) return null;  // Handle undefined or null URLs
