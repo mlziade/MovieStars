@@ -243,27 +243,38 @@ function queryImdb(query) {
     })
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-    const imdbInfo = document.getElementById('imdb');
-    const malInfo = document.getElementById('myAnimeList');
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the seriesTitle from local storage
+    chrome.storage.local.get('seriesTitle', function(data) {
+        if (data.seriesTitle) {
+            const seriesTitle = data.seriesTitle;
 
-    // Load seriesTitle from local storage and then perform queries directly
-    chrome.storage.local.get("seriesTitle", (result) => {
-        const seriesTitle = result.seriesTitle;
-        console.log("Updated seriesTitle:", seriesTitle);
+            // Function to update the popup with data
+            function updatePopup(imdbData, malData) {
+                // Update title
+                document.getElementById('title').textContent = seriesTitle;
 
-        queryImdb(seriesTitle).then((data) => {
-            console.log(data);
-            imdbInfo.textContent = JSON.stringify(data, null, 2);
-        }).catch((error) => {
-            console.error(error);
-        });
+                // Update ratings
+                document.getElementById('imdb-rating-value').textContent = imdbData ? imdbData.score : 'N/A';
+                document.getElementById('mal-rating-value').textContent = malData ? malData.score : 'N/A';
 
-        queryMyAnimeList(seriesTitle).then((data) => {
-            console.log(data);
-            malInfo.textContent = JSON.stringify(data, null, 2);
-        }).catch((error) => {
-            console.error(error);
-        });
+                // Update poster (assuming the first image is the poster)
+                const poster = imdbData ? imdbData.image : malData ? malData.image : null;
+                if (poster) {
+                    document.getElementById('poster').src = poster;
+                }
+            }
+
+            // Call the functions and update the popup
+            Promise.all([queryImdb(seriesTitle), queryMyAnimeList(seriesTitle)])    
+                .then(results => {
+                    const [imdbData, malData] = results;
+                    console.log(imdbData, malData);
+                    updatePopup(imdbData, malData);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
     });
 });

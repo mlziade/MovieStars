@@ -1,23 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <title>Extension Popup</title>
-    <style></style>
-</head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            background-color: black;
+            border: 1px solid black;
+            width: 300px;
+            color: white;
+        }
 
+        h2 {
+            text-align: center;
+            font: bold 1.5em sans-serif;
+            color: purple;
+        }
+
+        h3 {
+            text-align: center;
+        }
+
+        #ratings {
+            display: flex;
+            justify-content: center;
+        }
+
+        div #imdb-rating, div #mal-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px;
+        }
+
+        #poster {
+            width: 100%;
+            border: 3px solid #FFD700; /* Golden border */
+        }
+
+        #posterContainer {
+            margin: 0px 30px 0px 30px;
+        }
+
+        footer {
+            text-align: right;
+        }
+
+    </style>
+</head>
 <body>
     <h2>MovieStars</h2>
-    <p>IMDB</p>
+    <h3 id="title">Series Title</h3>
+    <div id="posterContainer">
+        <img id="poster" src="../assets/default-poster.svg" alt="Poster">
+    </div>
+    <div id="ratings">
+        <div id="imdb-rating">
+            <img id="imdb-svg" src="../assets/imdb.svg" alt="IMDB" width="20" height="20">
+            <p id="imdb-rating-value">N/A</p>
+        </div>
+        <div id="mal-rating">
+            <img id="mal-svg" src="../assets/myanimelist.svg" alt="IMDB" width="20" height="20">
+            <p id="mal-rating-value">N/A</p>
+        </div>
+    </div>
     <p id="imdb"></p>
-    <p>myAnimeList</p>
     <p id="myAnimeList"></p>
     <footer>
         <a href="https://github.com/mlziade">Developed by mlziade
             <img src="../assets/github-mark.svg" alt="GitHub" width="20" height="20" style="margin-bottom: -4px;">
         </a>
+    </footer>
     <script src="../scripts/popup.js"></script>
     <script src="../scripts/content.js"></script>
 </body>
-
 </html>
