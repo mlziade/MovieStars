@@ -25,11 +25,28 @@ function processTab(activeTab) {
         switch (domain) {
             case 'play.max.com':
                 console.log("HBO Max");
-                chrome.storage.local.set({ seriesTitle: "" }, () => {});
+                if (url.includes('/show/')) {
+                    const urlSplit = url.split('/');
+                    const length = urlSplit.length;
+                    const seriesId = urlSplit[length - 1];
+                    chrome.scripting.executeScript({
+                        target: { tabId: activeTab.id },
+                        func: () => {
+                            const htmlContent = document.documentElement.innerHTML;
+                            const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
+                            const button = doc.querySelector('button[data-testid="myList_button"]');
+                            return button ? button.getAttribute('aria-label') : null;
+                        }
+                    }, (results) => {
+                        const seriesTitle = results && results[0] ? extractHboMaxNameFromButton(results[0].result) : null;
+                        chrome.storage.local.set({ seriesTitle: seriesTitle }, () => { });
+                        return seriesTitle;
+                    });
+                }
                 break;
             case 'www.netflix.com':
                 console.log("Netflix");
-                chrome.storage.local.set({ seriesTitle: "" }, () => {});
+                chrome.storage.local.set({ seriesTitle: "" }, () => { });
                 break;
             case 'www.crunchyroll.com':
                 console.log("Crunchyroll");
@@ -70,7 +87,7 @@ function processTab(activeTab) {
                 }
                 break;
             default:
-                chrome.storage.local.set({ seriesTitle: "" }, () => {});
+                chrome.storage.local.set({ seriesTitle: "" }, () => { });
                 break;
         }
     }
@@ -106,4 +123,8 @@ function normalizeNameCrunchyroll(name) {
         .replace(/-/g, ' ') // Replace hyphens with spaces
         .replace(/\b\w/g, char => char.toUpperCase()) // Capitalize the first letter of each word
         .trim(); // Trim any leading/trailing spaces
+}
+
+function extractHboMaxNameFromButton(text) {
+    return text.split('Adicionar ')[1].split(' aos Meus itens')[0];
 }
