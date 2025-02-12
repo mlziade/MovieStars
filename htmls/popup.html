@@ -81,7 +81,11 @@
             @keyframes spin {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
-            }
+        }
+
+        #no-title {
+            display: flex;
+        }
 
     </style>
 </head>
@@ -91,7 +95,9 @@
         <div class="spinner"></div>
     </div>
     <div id="no-title" style="display: none;">
-        <h3 id="error-message">Access a valid website to see more information</h3>
+        <p id="error-message">Access a valid website to see more information or type in a Title</p>
+        <input id="search-title" placeholder="Enter a Show Title"></input>
+        <button id="search-button">Search</button>
     </div>
     <div id ="content" style="display: none;">
         <h3 id="title">Series Title</h3>

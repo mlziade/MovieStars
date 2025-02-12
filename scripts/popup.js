@@ -253,42 +253,67 @@ function queryImdb(query) {
     })
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    // Function to update the popup with data
+    function updatePopup(imdbData, malData, seriesTitle) {
+        // Update title
+        document.getElementById('title').textContent = seriesTitle;
+
+        // Update ratings
+        document.getElementById('imdb-rating-value').textContent = imdbData ? imdbData.score : 'N/A';
+        document.getElementById('mal-rating-value').textContent = malData ? malData.score : 'N/A';
+
+        document.getElementById('imdb-rating-value').href = imdbData ? imdbData.referenceUrl : '';
+        document.getElementById('mal-rating-value').href = malData ? malData.referenceUrl : '';
+
+        // Update poster (assuming the first image is the poster)
+        const poster = imdbData ? imdbData.image : malData ? malData.image : null;
+        if (poster) {
+            document.getElementById('poster').src = poster;
+        }
+    }
+
     // Get the seriesTitle from local storage
-    chrome.storage.local.get('seriesTitle', function(data) {
+    chrome.storage.local.get('seriesTitle', function (data) {
+        // If the seriesTitle is not set, take the user input
         if (data.seriesTitle == "") {
-            console.log("No series title found in storage");
             document.getElementById('loading').style.display = 'none';
             document.getElementById('no-title').style.display = 'block';
-        }
-        if (data.seriesTitle) {
+
+            // Add event listener to the search button
+            const searchInput = document.getElementById('search-title');
+            const searchButton = document.getElementById('search-button');
+            searchButton.addEventListener('click', function () {
+                document.getElementById('no-title').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+                const searchValue = searchInput.value;
+                chrome.storage.local.set({ seriesTitle: searchValue }, () => { });
+
+                // Call the functions and update the popup
+                Promise.all([queryImdb(searchValue), queryMyAnimeList(searchValue)])
+                    .then(results => {
+                        const [imdbData, malData] = results;
+                        updatePopup(imdbData, malData, searchValue);
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('content').style.display = 'block';
+                        document.getElementById('no-title').style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+            });
+
+
+            // If the seriesTitle is set, query IMDb and MyAnimeList for the series
+        } else if (data.seriesTitle) {
             const seriesTitle = data.seriesTitle;
 
-            // Function to update the popup with data
-            function updatePopup(imdbData, malData) {
-                // Update title
-                document.getElementById('title').textContent = seriesTitle;
-
-                // Update ratings
-                document.getElementById('imdb-rating-value').textContent = imdbData ? imdbData.score : 'N/A';
-                document.getElementById('mal-rating-value').textContent = malData ? malData.score : 'N/A';
-
-                document.getElementById('imdb-rating-value').href = imdbData ? imdbData.referenceUrl : '';
-                document.getElementById('mal-rating-value').href = malData ? malData.referenceUrl : '';
-
-                // Update poster (assuming the first image is the poster)
-                const poster = imdbData ? imdbData.image : malData ? malData.image : null;
-                if (poster) {
-                    document.getElementById('poster').src = poster;
-                }
-            }
-
             // Call the functions and update the popup
-            Promise.all([queryImdb(seriesTitle), queryMyAnimeList(seriesTitle)])    
+            Promise.all([queryImdb(seriesTitle), queryMyAnimeList(seriesTitle)])
                 .then(results => {
                     const [imdbData, malData] = results;
                     console.log(imdbData, malData);
-                    updatePopup(imdbData, malData);
+                    updatePopup(imdbData, malData, seriesTitle);
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('content').style.display = 'block';
                 })
