@@ -449,24 +449,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         }
 
-        // Add event listeners to the "carrousel" buttons
-        const carrouselButton1 = document.getElementById('poster-dot-1');
-        const carrouselButton2 = document.getElementById('poster-dot-2');
-        carrouselButton1.addEventListener('click', function () {
+        // Add event listeners to the rating buttons
+        const imdbButton = document.getElementById('imdb-rating');
+        const malButton = document.getElementById('mal-rating');
+        const letterboxdButton = document.getElementById('letterboxd-rating');
+        imdbButton.addEventListener('click', function () {
             // Show the IMDb poster and hide the MAL poster
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
-            // Show the imdb title provider
             document.getElementById('title-provider-imdb').style.display = 'block';
             document.getElementById('title-provider-mal').style.display = 'none';
         });
-        carrouselButton2.addEventListener('click', function () {
+        malButton.addEventListener('click', function () {
             // Show the IMDb poster and hide the MAL poster
             document.getElementById('poster-imdb').style.display = 'none';
             document.getElementById('poster-mal').style.display = 'block';
-            // Show the mal title provider
             document.getElementById('title-provider-imdb').style.display = 'none';
             document.getElementById('title-provider-mal').style.display = 'block';
+        });
+        letterboxdButton.addEventListener('click', function () {
+            // ToDo: Show the Letterboxd poster and hide the IMDb and MAL posters
         });
     });
 });
