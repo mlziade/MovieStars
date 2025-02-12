@@ -258,6 +258,8 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.get('seriesTitle', function(data) {
         if (data.seriesTitle == "") {
             console.log("No series title found in storage");
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('no-title').style.display = 'block';
         }
         if (data.seriesTitle) {
             const seriesTitle = data.seriesTitle;
