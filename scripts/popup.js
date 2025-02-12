@@ -286,10 +286,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (posterImdb && posterMal) {
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
-        } else if (posterImdb) {
+        } else if (posterImdb && !posterMal) {
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
-        } else if (posterMal) {
+        } else if (!posterImdb && posterMal) {
             document.getElementById('poster-imdb').style.display = 'none';
             document.getElementById('poster-mal').style.display = 'block';
         } else {
