@@ -1,4 +1,6 @@
-![Logo](/assets/logo-moviestars.png)
+<p align="center">
+    <img src="https://github.com/mlziade/MovieStars/blob/master/assets/logo-moviestars.png?raw=true">
+</p>
 
 ## Description
 
