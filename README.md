@@ -12,6 +12,8 @@ Details currently extracted:
 ## Examples
 ![11/02/2025](/assets/docs/example2.jpg)
 
+![11/02/2025](/assets/docs/example3.png)
+
 ## Websites
 
 ### Currently Supported Show Title Extraction
