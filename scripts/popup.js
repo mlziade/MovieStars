@@ -266,10 +266,38 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('imdb-rating-value').href = imdbData ? imdbData.referenceUrl : '';
         document.getElementById('mal-rating-value').href = malData ? malData.referenceUrl : '';
 
-        // Update poster (assuming the first image is the poster)
-        const poster = imdbData ? imdbData.image : malData ? malData.image : null;
-        if (poster) {
-            document.getElementById('poster').src = poster;
+        // Update IMDb poster
+        const posterImdb = imdbData ? imdbData.image : null;
+        if (posterImdb) {
+            document.getElementById('poster-imdb').src = posterImdb;
+            document.getElementById('poster-imdb').style.display = 'block';
+            document.getElementById('poster-mal').style.display = 'none';
+        }
+
+        // Update MAL poster
+        const posterMal = malData ? malData.image : null;
+        if (posterMal) {
+            document.getElementById('poster-mal').src = posterMal;
+            document.getElementById('poster-imdb').style.display = 'none';
+            document.getElementById('poster-mal').style.display = 'block';
+        }
+
+        // Update the carrousel buttons
+        if (posterImdb && posterMal) {
+            document.getElementById('poster-imdb').style.display = 'block';
+            document.getElementById('poster-mal').style.display = 'none';
+        } else if (posterImdb) {
+            document.getElementById('poster-imdb').style.display = 'block';
+            document.getElementById('poster-mal').style.display = 'none';
+        } else if (posterMal) {
+            document.getElementById('poster-imdb').style.display = 'none';
+            document.getElementById('poster-mal').style.display = 'block';
+        } else {
+            document.getElementById('poster-imdb').style.src = '../assets/default-poster.svg';
+            document.getElementById('poster-imdb').style.display = 'block';
+            document.getElementById('poster-mal').style.display = 'none';
+            document.getElementById('poster-dot-1').style.display = 'none';
+            document.getElementById('poster-dot-2').style.display = 'none';
         }
     }
 
@@ -303,7 +331,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
             });
 
-
             // If the seriesTitle is set, query IMDb and MyAnimeList for the series
         } else if (data.seriesTitle) {
             const seriesTitle = data.seriesTitle;
@@ -321,5 +348,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error('Error fetching data:', error);
                 });
         }
+
+        const carrouselButton1 = document.getElementById('poster-dot-1');
+        const carrouselButton2 = document.getElementById('poster-dot-2');
+        carrouselButton1.addEventListener('click', function () {
+            document.getElementById('poster-imdb').style.display = 'block';
+            document.getElementById('poster-mal').style.display = 'none';
+        });
+        carrouselButton2.addEventListener('click', function () {
+            document.getElementById('poster-imdb').style.display = 'none';
+            document.getElementById('poster-mal').style.display = 'block';
+        });
     });
 });

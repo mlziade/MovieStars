@@ -39,9 +39,15 @@ div #mal-rating {
     color: rgb(227, 227, 227);
 }
 
-#poster {
+#poster-imdb, #poster-mal {
     width: 100%;
     border: 1px solid #ffffffb8;
+}
+
+div #poster-dots {
+    display: flex;
+    justify-content: center;
+    margin: 10px;
 }
 
 #posterContainer {
@@ -88,4 +94,16 @@ footer img {
 
 #no-title {
     display: flex;
+}
+
+/* The dots/bullets/indicators */
+.dot {
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
 }

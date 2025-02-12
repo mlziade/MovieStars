@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Extension Popup</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="../styles/popup.css">
 </head>
+
 <body>
     <h2>MovieStars</h2>
     <div id="loading">
@@ -15,28 +17,34 @@
         <input id="search-title" placeholder="Enter a Show Title"></input>
         <button id="search-button">Search</button>
     </div>
-    <div id ="content" style="display: none;">
+    <div id="content" style="display: none;">
         <h3 id="title">Series Title</h3>
         <div id="posterContainer">
-            <img id="poster" src="../assets/default-poster.svg" alt="Poster">
-        </div>
-        <div id="ratings">
-            <div id="imdb-rating">
-                <img id="imdb-svg" src="../assets/imdb.svg" alt="IMDB" width="20" height="20">
-                <a id="imdb-rating-value" href="">N/A</a>
+            <img id="poster-imdb" src="../assets/default-poster.svg" alt="Poster">
+            <img id="poster-mal" src="../assets/default-poster.svg" alt="Poster">
+            <div id="poster-dots">
+                <span class="dot" id="poster-dot-1"></span>
+                <span class="dot" id="poster-dot-2"></span>
             </div>
-            <div id="mal-rating">
-                <img id="mal-svg" src="../assets/myanimelist.svg" alt="IMDB" width="20" height="20">
-                <a id="mal-rating-value" href="">N/A</a>
+            <div id="ratings">
+                <div id="imdb-rating">
+                    <img id="imdb-svg" src="../assets/imdb.svg" alt="IMDB" width="20" height="20">
+                    <a id="imdb-rating-value" href="">N/A</a>
+                </div>
+                <div id="mal-rating">
+                    <img id="mal-svg" src="../assets/myanimelist.svg" alt="IMDB" width="20" height="20">
+                    <a id="mal-rating-value" href="">N/A</a>
+                </div>
             </div>
         </div>
-    </div>
-    <footer>
-        <a href="https://github.com/mlziade">Developed by mlziade
-            <img src="../assets/github-mark-white.svg" alt="GitHub" width="20" height="20" style="margin-bottom: -4px;">
-        </a>
-    </footer>
-    <script src="../scripts/popup.js"></script>
-    <script src="../scripts/content.js"></script>
+        <footer>
+            <a href="https://github.com/mlziade">Developed by mlziade
+                <img src="../assets/github-mark-white.svg" alt="GitHub" width="20" height="20"
+                    style="margin-bottom: -4px;">
+            </a>
+        </footer>
+        <script src="../scripts/popup.js"></script>
+        <script src="../scripts/content.js"></script>
 </body>
+
 </html>
