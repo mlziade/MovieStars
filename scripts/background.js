@@ -25,10 +25,10 @@ function processTab(activeTab) {
         switch (domain) {
             case 'play.max.com':
                 console.log("HBO Max");
+
                 if (url.includes('/show/')) {
                     const urlSplit = url.split('/');
                     const length = urlSplit.length;
-                    // const seriesId = urlSplit[length - 1];
                     chrome.scripting.executeScript({
                         target: { tabId: activeTab.id },
                         func: () => {
@@ -141,5 +141,6 @@ function normalizeNameCrunchyroll(name) {
 }
 
 function extractHboMaxNameFromButton(text) {
-    return text.split('Adicionar ')[1].split(' aos Meus itens')[0];
+    const splitText = text.split(' ');
+    return splitText.slice(1, -3).join(' ');
 }

@@ -89,6 +89,10 @@ function queryMyAnimeList(query) {
 
                     const scoreFormatted = parseFloat(score).toFixed(2);
 
+                    if (!title) {
+                        continue;
+                    }
+
                     queryResult.animes.push({
                         title,
                         image: imageUrl,
@@ -220,6 +224,10 @@ function queryImdb(query) {
                     const title = result.titleNameText;
                     const image = result.titlePosterImageModel?.url;
                     const score = ""
+
+                    if (!title) {
+                        continue;
+                    }
 
                     queryResult.animes.push({
                         id,
