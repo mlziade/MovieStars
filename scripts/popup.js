@@ -289,9 +289,13 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (posterImdb && !posterMal) {
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
+            document.getElementById('poster-dot-1').style.display = 'none';
+            document.getElementById('poster-dot-2').style.display = 'none';
         } else if (!posterImdb && posterMal) {
             document.getElementById('poster-imdb').style.display = 'none';
             document.getElementById('poster-mal').style.display = 'block';
+            document.getElementById('poster-dot-1').style.display = 'none';
+            document.getElementById('poster-dot-2').style.display = 'none';
         } else {
             document.getElementById('poster-imdb').style.src = '../assets/default-poster.svg';
             document.getElementById('poster-imdb').style.display = 'block';
