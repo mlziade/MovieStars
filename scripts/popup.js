@@ -87,6 +87,7 @@ function queryMyAnimeList(query) {
                         image: imageUrl,
                         score,
                         levenshteinScore: levenshteinDistance(query, title),
+                        referenceUrl: animeListDivs[i].querySelector(".title a")?.getAttribute("href"),
                     });
                 }
 
@@ -219,6 +220,7 @@ function queryImdb(query) {
                         image,
                         score,
                         levenshteinScore: levenshteinDistance(query, title),
+                        referenceUrl: `https://www.imdb.com/title/${id}/`,
                     });
                 }
 
@@ -257,6 +259,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update ratings
                 document.getElementById('imdb-rating-value').textContent = imdbData ? imdbData.score : 'N/A';
                 document.getElementById('mal-rating-value').textContent = malData ? malData.score : 'N/A';
+
+                document.getElementById('imdb-rating-value').href = imdbData ? imdbData.referenceUrl : '';
+                document.getElementById('mal-rating-value').href = malData ? malData.referenceUrl : '';
 
                 // Update poster (assuming the first image is the poster)
                 const poster = imdbData ? imdbData.image : malData ? malData.image : null;
