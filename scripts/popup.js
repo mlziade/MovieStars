@@ -268,6 +268,10 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('imdb-rating-value').href = imdbData ? imdbData.referenceUrl : '';
         document.getElementById('mal-rating-value').href = malData ? malData.referenceUrl : '';
 
+        // Update IMDb and MAL SVGs href values
+        document.getElementById('imdb-svg-ref').href = imdbData ? imdbData.referenceUrl : '';
+        document.getElementById('mal-svg-ref').href = malData ? malData.referenceUrl : '';
+
         // Update IMDb poster source
         const posterImdb = imdbData ? imdbData.image : null;
         if (posterImdb) {

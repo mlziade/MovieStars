@@ -8,7 +8,6 @@
 </head>
 
 <body>
-    <!-- <h2>MovieStars</h2> -->
     <img id="logo" src="../assets/logo-moviestars.png" alt="Logo" width="250" height="auto">
     <div id="loading">
         <div class="spinner"></div>
@@ -23,19 +22,21 @@
         <div id="posterContainer">
             <img id="poster-imdb" src="../assets/default-poster.svg" alt="Poster">
             <img id="poster-mal" src="../assets/default-poster.svg" alt="Poster">
-            <div id="poster-dots">
-                <span class="dot" id="poster-dot-1"></span>
-                <span class="dot" id="poster-dot-2"></span>
+        </div>
+        <div id="poster-dots">
+            <span class="dot" id="poster-dot-1"></span>
+            <span class="dot" id="poster-dot-2"></span>
+        </div>
+        <div id="ratings">
+            <div id="imdb-rating" class="rounded-box">
+                <a id="imdb-svg-ref" href=""><img id="imdb-svg" src="../assets/imdb.svg" alt="IMDB" width="20"
+                        height="20"></a>
+                <a id="imdb-rating-value" href="">N/A</a>
             </div>
-            <div id="ratings">
-                <div id="imdb-rating">
-                    <img id="imdb-svg" src="../assets/imdb.svg" alt="IMDB" width="20" height="20">
-                    <a id="imdb-rating-value" href="">N/A</a>
-                </div>
-                <div id="mal-rating">
-                    <img id="mal-svg" src="../assets/myanimelist.svg" alt="IMDB" width="20" height="20">
-                    <a id="mal-rating-value" href="">N/A</a>
-                </div>
+            <div id="mal-rating" class="rounded-box">
+                <a id="mal-svg-ref" href=""><img id="mal-svg" src="../assets/myanimelist.svg" alt="IMDB" width="20"
+                        height="20"></a>
+                <a id="mal-rating-value" href="">N/A</a>
             </div>
         </div>
     </div>
