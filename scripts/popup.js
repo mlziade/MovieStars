@@ -256,6 +256,9 @@ function queryImdb(query) {
 document.addEventListener('DOMContentLoaded', function() {
     // Get the seriesTitle from local storage
     chrome.storage.local.get('seriesTitle', function(data) {
+        if (data.seriesTitle == "") {
+            console.log("No series title found in storage");
+        }
         if (data.seriesTitle) {
             const seriesTitle = data.seriesTitle;
 
@@ -284,6 +287,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const [imdbData, malData] = results;
                     console.log(imdbData, malData);
                     updatePopup(imdbData, malData);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('content').style.display = 'block';
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
