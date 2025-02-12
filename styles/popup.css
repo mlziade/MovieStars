@@ -23,7 +23,8 @@ h3 {
 }
 
 div #imdb-rating,
-div #mal-rating {
+div #mal-rating,
+div #letterboxd-rating {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -34,23 +35,26 @@ div #mal-rating {
 }
 
 div #imdb-rating:hover,
-div #mal-rating:hover {
+div #mal-rating:hover,
+div #letterboxd-rating:hover {
     background-color: #000000;
 }
 
 #mal-rating #mal-rating-value,
-#imdb-rating #imdb-rating-value {
+#imdb-rating #imdb-rating-value,
+#letterboxd-rating #letterboxd-rating-value {
     color: white;
     font-family: sans-serif;
     text-decoration: none;
 }
 
 #mal-rating #mal-rating-value:hover,
-#imdb-rating #imdb-rating-value:hover {
+#imdb-rating #imdb-rating-value:hover,
+#letterboxd-rating #letterboxd-rating-value:hover {
     color: rgb(227, 227, 227);
 }
 
-#imdb-svg-ref, #mal-svg-ref {
+#imdb-svg-ref, #mal-svg-ref, #letterboxd-svg-ref {
     margin: 3px 0px 0px 0px;
 }
 

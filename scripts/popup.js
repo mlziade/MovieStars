@@ -261,24 +261,90 @@ function queryImdb(query) {
     })
 };
 
+function queryLetterboxd(query) {
+    return new Promise((resolve, reject) => {
+        const finalUrl = `https://www.letterboxd.com/s/search/${query}/?__csrf=804700fc55592152ef82`;
+        const fetchOptions = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            }
+        };
+
+        fetch(finalUrl, fetchOptions)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error while fetching content of ${finalUrl} ` + response.status);
+                }
+                return response.text();
+            })
+            .then(html => {
+                // Create a query result object
+                const queryResult = {
+                    animes: []
+                }
+
+                // Parse the HTML content of the search results page using DOMParser
+                const doc = new DOMParser().parseFromString(html, "text/html");
+
+                // Get the ul element with class "results"
+                const resultsUl = doc.querySelector("ul.results");
+
+                // Get all li elements within the ul
+                const resultItems = resultsUl.querySelectorAll("li");
+
+                // Loop through all list items using a for loop and extract the title, image, and score
+                for (let i = 0; i < resultItems.length; i++) {
+                    const item = resultItems[i];
+                    const title = item.querySelector(".film-detail-content h2 a")?.textContent.trim();
+                    const referenceUrl = item.querySelector(".film-detail-content h2 a")?.getAttribute("href");
+
+                    if (!title) {
+                        continue;
+                    }
+
+                    queryResult.animes.push({
+                        title,
+                        image: "",
+                        score: "N/A",
+                        levenshteinScore: levenshteinDistance(query, title),
+                        referenceUrl: `https://www.letterboxd.com${referenceUrl}`,
+                    });
+                }
+
+                // Find the best match based on the lowest levenshtein score
+                const bestMatch = queryResult.animes.filter(anime => anime.levenshteinScore === Math.min(...queryResult.animes.map(anime => anime.levenshteinScore)))[0];
+
+                resolve(bestMatch);
+            }
+            )
+            .catch(error => {
+                reject(error);
+            });
+    });
+}
+
 // Wait for the DOM of the popup to be fully loaded
 document.addEventListener('DOMContentLoaded', function () {
     // Auxiliar function to update the popup with data
-    function updatePopup(imdbData, malData, seriesTitle) {
+    function updatePopup(imdbData, malData, letterboxdData, seriesTitle) {
         // Update title
         document.getElementById('title').textContent = seriesTitle;
 
         // Update ratings values
         document.getElementById('imdb-rating-value').textContent = imdbData ? imdbData.score : 'N/A';
         document.getElementById('mal-rating-value').textContent = malData ? malData.score : 'N/A';
+        document.getElementById('letterboxd-rating-value').textContent = letterboxdData ? letterboxdData.score : 'N/A';
 
         // Update ratings links
         document.getElementById('imdb-rating-value').href = imdbData ? imdbData.referenceUrl : '';
         document.getElementById('mal-rating-value').href = malData ? malData.referenceUrl : '';
+        document.getElementById('letterboxd-rating-value').href = letterboxdData ? letterboxdData.referenceUrl : '';
 
         // Update IMDb and MAL SVGs href values
         document.getElementById('imdb-svg-ref').href = imdbData ? imdbData.referenceUrl : '';
         document.getElementById('mal-svg-ref').href = malData ? malData.referenceUrl : '';
+        document.getElementById('letterboxd-svg-ref').href = letterboxdData ? letterboxdData.referenceUrl : '';
 
         // Update IMDb poster source
         const posterImdb = imdbData ? imdbData.image : null;
@@ -352,10 +418,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 chrome.storage.local.set({ seriesTitle: searchValue }, () => { });
 
                 // Call the providers functions and update the popup
-                Promise.all([queryImdb(searchValue), queryMyAnimeList(searchValue)])
+                Promise.all([queryImdb(searchValue), queryMyAnimeList(searchValue), letterboxdData(searchValue)])
                     .then(results => {
-                        const [imdbData, malData] = results;
-                        updatePopup(imdbData, malData, searchValue);
+                        const [imdbData, malData, letterboxdData] = results;
+                        updatePopup(imdbData, malData, letterboxdData, searchValue);
                         document.getElementById('loading').style.display = 'none';
                         document.getElementById('content').style.display = 'block';
                         document.getElementById('no-title').style.display = 'none';
@@ -370,11 +436,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const seriesTitle = data.seriesTitle;
 
             // Call the providers functions and update the popup
-            Promise.all([queryImdb(seriesTitle), queryMyAnimeList(seriesTitle)])
+            Promise.all([queryImdb(seriesTitle), queryMyAnimeList(seriesTitle), queryLetterboxd(seriesTitle)])
                 .then(results => {
-                    const [imdbData, malData] = results;
-                    console.log(imdbData, malData);
-                    updatePopup(imdbData, malData, seriesTitle);
+                    const [imdbData, malData, letterboxdData] = results;
+                    updatePopup(imdbData, malData, letterboxdData, seriesTitle);
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('content').style.display = 'block';
                     document.getElementById('no-title').style.display = 'none';
