@@ -253,59 +253,64 @@ function queryImdb(query) {
     })
 };
 
+// Wait for the DOM of the popup to be fully loaded
 document.addEventListener('DOMContentLoaded', function () {
-    // Function to update the popup with data
+    // Auxiliar function to update the popup with data
     function updatePopup(imdbData, malData, seriesTitle) {
         // Update title
         document.getElementById('title').textContent = seriesTitle;
 
-        // Update ratings
+        // Update ratings values
         document.getElementById('imdb-rating-value').textContent = imdbData ? imdbData.score : 'N/A';
         document.getElementById('mal-rating-value').textContent = malData ? malData.score : 'N/A';
 
+        // Update ratings links
         document.getElementById('imdb-rating-value').href = imdbData ? imdbData.referenceUrl : '';
         document.getElementById('mal-rating-value').href = malData ? malData.referenceUrl : '';
 
-        // Update IMDb poster
+        // Update IMDb poster source
         const posterImdb = imdbData ? imdbData.image : null;
         if (posterImdb) {
             document.getElementById('poster-imdb').src = posterImdb;
-            document.getElementById('poster-imdb').style.display = 'block';
-            document.getElementById('poster-mal').style.display = 'none';
         }
 
-        // Update MAL poster
+        // Update MAL poster source
         const posterMal = malData ? malData.image : null;
         if (posterMal) {
             document.getElementById('poster-mal').src = posterMal;
-            document.getElementById('poster-imdb').style.display = 'none';
-            document.getElementById('poster-mal').style.display = 'block';
         }
 
-        // Update the carrousel buttons
+        // Update the posters and "carrousel" dots visibility based on the data availability
         if (posterImdb && posterMal) {
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
         } else if (posterImdb && !posterMal) {
+            // Hide the MAL poster and show the IMDb poster
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
+
+            // Hide the carrousel dots
             document.getElementById('poster-dot-1').style.display = 'none';
             document.getElementById('poster-dot-2').style.display = 'none';
         } else if (!posterImdb && posterMal) {
+            // Hide the IMDb poster and show the MAL poster
             document.getElementById('poster-imdb').style.display = 'none';
             document.getElementById('poster-mal').style.display = 'block';
+            // Hide the carrousel dots
             document.getElementById('poster-dot-1').style.display = 'none';
             document.getElementById('poster-dot-2').style.display = 'none';
         } else {
+            // If no poster is available, show the default poster
             document.getElementById('poster-imdb').style.src = '../assets/default-poster.svg';
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
+            // Hide the carrousel dots
             document.getElementById('poster-dot-1').style.display = 'none';
             document.getElementById('poster-dot-2').style.display = 'none';
         }
     }
 
-    // Get the seriesTitle from local storage
+    // Get the series title from the local storage
     chrome.storage.local.get('seriesTitle', function (data) {
         // If the seriesTitle is not set, take the user input
         if (data.seriesTitle == "") {
@@ -321,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const searchValue = searchInput.value;
                 chrome.storage.local.set({ seriesTitle: searchValue }, () => { });
 
-                // Call the functions and update the popup
+                // Call the providers functions and update the popup
                 Promise.all([queryImdb(searchValue), queryMyAnimeList(searchValue)])
                     .then(results => {
                         const [imdbData, malData] = results;
@@ -335,11 +340,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
             });
 
-            // If the seriesTitle is set, query IMDb and MyAnimeList for the series
+        // If the seriesTitle is set, query the providers for the series
         } else if (data.seriesTitle) {
             const seriesTitle = data.seriesTitle;
 
-            // Call the functions and update the popup
+            // Call the providers functions and update the popup
             Promise.all([queryImdb(seriesTitle), queryMyAnimeList(seriesTitle)])
                 .then(results => {
                     const [imdbData, malData] = results;
@@ -347,12 +352,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     updatePopup(imdbData, malData, seriesTitle);
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('content').style.display = 'block';
+                    document.getElementById('no-title').style.display = 'none';
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
                 });
         }
 
+        // Add event listeners to the "carrousel" buttons
         const carrouselButton1 = document.getElementById('poster-dot-1');
         const carrouselButton2 = document.getElementById('poster-dot-2');
         carrouselButton1.addEventListener('click', function () {
