@@ -63,7 +63,7 @@ div #mal-rating:hover {
 #posterContainer {
     display: flex;
     justify-content: center;
-    margin: 10px 0px 10px 0px;
+    margin: 10px 0px 0px 0px;
 }
 
 div #poster-dots {
@@ -133,4 +133,16 @@ footer img {
 #logo {
     display: block;
     margin: 0 auto;
+}
+
+.div-title-provider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0px 0px 0px 0px;
+}
+
+#title-provider-imdb, #title-provider-mal {
+    text-align: center;
+    margin: 0px 0px 0px 0px;
 }

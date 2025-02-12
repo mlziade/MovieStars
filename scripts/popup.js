@@ -296,11 +296,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (posterImdb && posterMal) {
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
+            // Update the title provider
+            document.getElementById('title-provider-imdb').textContent = imdbData.title;
+            document.getElementById('title-provider-mal').textContent = malData.title;
+            document.getElementById('title-provider-imdb').style.display = 'block';
+            document.getElementById('title-provider-mal').style.display = 'none';
         } else if (posterImdb && !posterMal) {
             // Hide the MAL poster and show the IMDb poster
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
-
+            // Update the title provider
+            document.getElementById('title-provider-imdb').textContent = imdbData.title;
+            document.getElementById('title-provider-mal').style.display = 'none';
             // Hide the carrousel dots
             document.getElementById('poster-dot-1').style.display = 'none';
             document.getElementById('poster-dot-2').style.display = 'none';
@@ -308,6 +315,9 @@ document.addEventListener('DOMContentLoaded', function () {
             // Hide the IMDb poster and show the MAL poster
             document.getElementById('poster-imdb').style.display = 'none';
             document.getElementById('poster-mal').style.display = 'block';
+            // Update the title provider
+            document.getElementById('title-provider-mal').textContent = malData.title;
+            document.getElementById('title-provider-imdb').style.display = 'none';
             // Hide the carrousel dots
             document.getElementById('poster-dot-1').style.display = 'none';
             document.getElementById('poster-dot-2').style.display = 'none';
@@ -319,6 +329,9 @@ document.addEventListener('DOMContentLoaded', function () {
             // Hide the carrousel dots
             document.getElementById('poster-dot-1').style.display = 'none';
             document.getElementById('poster-dot-2').style.display = 'none';
+            // Hide Title provided by
+            document.getElementById('title-provider-imdb').style.display = 'none';
+            document.getElementById('title-provider-mal').style.display = 'none';
         }
     }
 
@@ -375,12 +388,20 @@ document.addEventListener('DOMContentLoaded', function () {
         const carrouselButton1 = document.getElementById('poster-dot-1');
         const carrouselButton2 = document.getElementById('poster-dot-2');
         carrouselButton1.addEventListener('click', function () {
+            // Show the IMDb poster and hide the MAL poster
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
+            // Show the imdb title provider
+            document.getElementById('title-provider-imdb').style.display = 'block';
+            document.getElementById('title-provider-mal').style.display = 'none';
         });
         carrouselButton2.addEventListener('click', function () {
+            // Show the IMDb poster and hide the MAL poster
             document.getElementById('poster-imdb').style.display = 'none';
             document.getElementById('poster-mal').style.display = 'block';
+            // Show the mal title provider
+            document.getElementById('title-provider-imdb').style.display = 'none';
+            document.getElementById('title-provider-mal').style.display = 'block';
         });
     });
 });
