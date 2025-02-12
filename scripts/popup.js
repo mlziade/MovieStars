@@ -82,10 +82,12 @@ function queryMyAnimeList(query) {
                     const imageUrl = animeListDivs[i].querySelector(".picSurround a img")?.getAttribute("data-src");
                     const score = animeListDivs[i].querySelector(".pt8")?.innerHTML.match(/Scored (\d+\.\d+)/)?.[1];
 
+                    const scoreFormatted = parseFloat(score).toFixed(2);
+
                     queryResult.animes.push({
                         title,
                         image: imageUrl,
-                        score,
+                        score: scoreFormatted,
                         levenshteinScore: levenshteinDistance(query, title),
                         referenceUrl: animeListDivs[i].querySelector(".title a")?.getAttribute("href"),
                     });
@@ -229,7 +231,8 @@ function queryImdb(query) {
 
                 // Get the IMDB rating of the best match
                 getImdbRating(bestMatch.id).then((rating) => {
-                    bestMatch.score = rating.ratingValue ? rating.ratingValue : "N/A";
+                    const scoreFormatted = rating.ratingValue ? parseFloat(rating.ratingValue).toFixed(2) : "N/A";
+                    bestMatch.score = scoreFormatted;
                     delete bestMatch.id; // Remove the IMDB id from the final result
 
                     resolve(bestMatch);  // Return the best match with IMDB rating updated
