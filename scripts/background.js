@@ -99,7 +99,7 @@ function extractDomain(url) {
 }
 
 function normalizeNameCrunchyroll(name) {
-    console.log("Normalizing: " + name);
+    // console.log("Normalizing: " + name);
     return name
         .replace(/-/g, ' ') // Replace hyphens with spaces
         .replace(/\b\w/g, char => char.toUpperCase()) // Capitalize the first letter of each word
