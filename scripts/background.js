@@ -25,9 +25,11 @@ function processTab(activeTab) {
         switch (domain) {
             case 'play.max.com':
                 console.log("HBO Max");
+                chrome.storage.local.set({ seriesTitle: "" }, () => {});
                 break;
             case 'www.netflix.com':
                 console.log("Netflix");
+                chrome.storage.local.set({ seriesTitle: "" }, () => {});
                 break;
             case 'www.crunchyroll.com':
                 console.log("Crunchyroll");
