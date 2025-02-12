@@ -28,7 +28,7 @@ function processTab(activeTab) {
                 if (url.includes('/show/')) {
                     const urlSplit = url.split('/');
                     const length = urlSplit.length;
-                    const seriesId = urlSplit[length - 1];
+                    // const seriesId = urlSplit[length - 1];
                     chrome.scripting.executeScript({
                         target: { tabId: activeTab.id },
                         func: () => {
@@ -39,6 +39,21 @@ function processTab(activeTab) {
                         }
                     }, (results) => {
                         const seriesTitle = results && results[0] ? extractHboMaxNameFromButton(results[0].result) : null;
+                        chrome.storage.local.set({ seriesTitle: seriesTitle }, () => { });
+                        return seriesTitle;
+                    });
+                } else if (url.includes('/watch/')) {
+                    chrome.scripting.executeScript({
+                        target: { tabId: activeTab.id },
+                        func: () => {
+                            const htmlContent = document.documentElement.innerHTML;
+                            const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
+                            const titleElement = doc.querySelector('span[data-testid="player-ux-asset-title"]');
+                            return titleElement ? titleElement.textContent.trim() : null;
+                        }
+                    }, (results) => {
+                        const seriesTitle = results && results[0] ? results[0].result : null;
+                        console.log("HBO Max seriesTitle: ", seriesTitle);
                         chrome.storage.local.set({ seriesTitle: seriesTitle }, () => { });
                         return seriesTitle;
                     });
