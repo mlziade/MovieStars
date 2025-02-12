@@ -10,7 +10,7 @@ Details currently extracted:
 - Reference Links
 
 ## Examples
-![11/02/2025](/assets/docs/example2.jpg)
+![11/02/2025](/assets/docs/example2.png)
 
 ![11/02/2025](/assets/docs/example3.png)
 
