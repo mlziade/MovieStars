@@ -11,5 +11,3 @@ Thumbs.db
 # Ignore IDE and editor directories
 .vscode/
 .idea/
-
-README.md
