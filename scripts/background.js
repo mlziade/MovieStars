@@ -18,7 +18,9 @@ function processTab(activeTab) {
     // Ensure we have a valid tab
     if (activeTab && activeTab.url) {
         const domain = extractDomain(activeTab.url);
-        // console.log("Domain: " + domain);
+
+        const url = activeTab.url;
+        console.log("URL: " + url);
 
         switch (domain) {
             case 'play.max.com':
@@ -29,9 +31,6 @@ function processTab(activeTab) {
                 break;
             case 'www.crunchyroll.com':
                 console.log("Crunchyroll");
-
-                const url = activeTab.url;
-                console.log("URL: " + url);
 
                 // Extract series from Crunchyroll series page
                 if (url.includes('/series')) {
@@ -69,6 +68,7 @@ function processTab(activeTab) {
                 }
                 break;
             default:
+                chrome.storage.local.set({ seriesTitle: "" }, () => {});
                 break;
         }
     }
