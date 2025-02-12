@@ -39,11 +39,16 @@ function levenshteinDistance(stringA, stringB) {
 }
 
 /**
- * Queries MyAnimeList for a given search term and returns the best matching anime.
+ * Queries MyAnimeList for anime entries that match the provided query string.
  *
- * @param {string} query - The search term to query MyAnimeList.
- * @returns {Promise<Object>} A promise that resolves to an object containing the best matching anime's title, image, score, and levenshtein score.
- * @throws {Error} If there is an HTTP error or any other issue during the fetch operation.
+ * @param {string} query - The search query used to find matching anime titles.
+ * @returns {Promise<Object>} A promise that resolves to an object representing the best matching anime, with the following properties:
+ *   @property {string} title - The title of the anime.
+ *   @property {string} image - The URL of the anime's image.
+ *   @property {string} score - The anime's score formatted to two decimal places.
+ *   @property {number} levenshteinScore - The computed Levenshtein distance between the query and the anime title.
+ *   @property {string} referenceUrl - The URL to the anime's detail page on MyAnimeList.
+ * @throws {Error} If the HTTP response is not successful or if there is an error during fetching/parsing.
  */
 function queryMyAnimeList(query) {
     return new Promise((resolve, reject) => {
@@ -109,10 +114,10 @@ function queryMyAnimeList(query) {
  *
  * @param {string} id - The IMDb ID of the movie or TV show.
  * @returns {Promise<Object>} A promise that resolves to an object containing the rating data:
- * - `ratingCount` {number}: The number of ratings.
- * - `bestRating` {number}: The highest possible rating.
- * - `worstRating` {number}: The lowest possible rating.
- * - `ratingValue` {number}: The average rating value.
+ *   @property {number} ratingCount - The number of ratings.
+ *   @property {number} bestRating - The highest possible rating.
+ *   @property {number} worstRating - The lowest possible rating.
+ *   @property {number} ratingValue - The average rating value.
  *
  * @throws {Error} If there is an HTTP error or if the rating data is not found.
  */
