@@ -1,4 +1,6 @@
-# MovieStars
+![Logo](/assets/logo-moviestars.png)
+
+## Description
 
 MovieStars is a Chrome extension that lets you effortlessly explore reviews from both users and critics. It aggregates essential details from leading entertainment websites. Whether you're deciding what to watch next or just curious about a show's information , MovieStars simplifies your search and enhances your viewing experience.
 
