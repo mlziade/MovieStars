@@ -20,16 +20,16 @@ Details currently extracted:
 
 ## Websites
 
-### Currently Supported Show Title Extraction
+### Supported for Extraction
 
 - Currently:
     - Crunchyroll
+    - Max (HBO Max)
 - Roadmap:
     - Netflix
-    - Max (HBO Max)
     - Disney Plus
 
-### Currently Supported Review Score Sources
+### Supported for Reviews
 
 - Currently:
     - IMDB
