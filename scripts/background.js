@@ -57,6 +57,8 @@ function processTab(activeTab) {
                         chrome.storage.local.set({ seriesTitle: seriesTitle }, () => { });
                         return seriesTitle;
                     });
+                } else {
+                    chrome.storage.local.set({ seriesTitle: "" }, () => { });
                 }
                 break;
             case 'www.netflix.com':
@@ -99,6 +101,8 @@ function processTab(activeTab) {
                             return normalizedTitle;
                         }
                     });
+                } else {
+                    chrome.storage.local.set({ seriesTitle: "" }, () => { });
                 }
                 break;
             default:
