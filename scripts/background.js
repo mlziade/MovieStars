@@ -26,7 +26,7 @@ function processTab(activeTab) {
             case 'play.max.com':
                 console.log("HBO Max");
 
-                if (url.includes('/show/')) {
+                if (url.includes('/show/') || url.includes('/movie/')) {
                     const urlSplit = url.split('/');
                     const length = urlSplit.length;
                     chrome.scripting.executeScript({
