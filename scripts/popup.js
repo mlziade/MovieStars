@@ -48,6 +48,7 @@ function levenshteinDistance(stringA, stringB) {
  *   @property {string} score - The anime's score formatted to two decimal places.
  *   @property {number} levenshteinScore - The computed Levenshtein distance between the query and the anime title.
  *   @property {string} referenceUrl - The URL to the anime's detail page on MyAnimeList.
+ * 
  * @throws {Error} If the HTTP response is not successful or if there is an error during fetching/parsing.
  */
 function queryMyAnimeList(query) {
@@ -178,10 +179,10 @@ function getImdbRating(id) {
  *
  * @param {string} query - The search term to query IMDb.
  * @returns {Promise<Object>} A promise that resolves to an object containing the best match with its IMDb rating.
- * @property {string} title - The title of the best match.
- * @property {string} image - The URL of the image of the best match.
- * @property {string} score - The IMDb rating of the best match.
- * @property {number} levenshteinScore - The Levenshtein distance score between the query and the title.
+ *  @property {string} title - The title of the best match.
+ *  @property {string} image - The URL of the image of the best match.
+ *  @property {string} score - The IMDb rating of the best match.
+ *  @property {number} levenshteinScore - The Levenshtein distance score between the query and the title.
  *
  * @throws {Error} If there is an HTTP error while fetching content from IMDb or if there is an error parsing the response.
  */
