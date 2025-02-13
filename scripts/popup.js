@@ -323,6 +323,24 @@ function getLetterboxdRatingAndImage(url) {
     });
 }
 
+/**
+ * Queries Letterboxd with the specified search query to find the best matching anime entry.
+ *
+ * The function constructs a search URL and sends a GET request to Letterboxd. It then parses the HTML
+ * response to extract search results, computes the Levenshtein distance between the query and each title,
+ * and selects the entry with the smallest distance as the best match. Once the best match is identified,
+ * it fetches additional details, such as the rating and image, for that entry.
+ *
+ * @param {string} query - The search query string used to search for an anime on Letterboxd.
+ * @returns {Promise<Object>} A promise that resolves to an object representing the best matching anime, with the following properties:
+ *  @property {string} title - The title of the anime.
+ *  @property {string} image - The URL of the anime's image.
+ *  @property {string} score - The anime's score formatted to two decimal places.
+ *  @property {number} levenshteinScore - The computed Levenshtein distance between the query and the anime title.
+ *  @property {string} referenceUrl - The URL to the anime's detail page on Letterboxd.
+ *
+ * @throws {Error} Throws an error if there is a problem with fetching the content or retrieving the additional details.
+ */
 function queryLetterboxd(query) {
     return new Promise((resolve, reject) => {
         const finalUrl = `https://www.letterboxd.com/s/search/${query}/?__csrf=804700fc55592152ef82`;
