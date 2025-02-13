@@ -306,7 +306,6 @@ function getLetterboxdRatingAndImage(url) {
     });
 }
 
-
 function queryLetterboxd(query) {
     return new Promise((resolve, reject) => {
         const finalUrl = `https://www.letterboxd.com/s/search/${query}/?__csrf=804700fc55592152ef82`;
@@ -527,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 chrome.storage.local.set({ seriesTitle: searchValue }, () => { });
 
                 // Call the providers functions and update the popup
-                Promise.all([queryImdb(searchValue), queryMyAnimeList(searchValue), letterboxdData(searchValue)])
+                Promise.all([queryImdb(searchValue), queryMyAnimeList(searchValue), queryLetterboxd(searchValue)])
                     .then(results => {
                         const [imdbData, malData, letterboxdData] = results;
                         updatePopup(imdbData, malData, letterboxdData, searchValue);
