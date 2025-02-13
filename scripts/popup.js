@@ -261,6 +261,22 @@ function queryImdb(query) {
     })
 };
 
+
+/**
+ * Fetches HTML content from the given URL and extracts the letterboxd rating and image.
+ *
+ * This function performs an HTTP GET request to retrieve the HTML of the provided URL, then
+ * uses regular expressions to extract the "ratingValue" and "image" URL from the response.
+ *
+ * @param {string} url - The URL to fetch the HTML content from.
+ * @returns {Promise<{object}>} A promise that resolves with an object containing:
+ *  @property {string} imageUrl - The URL of the image.
+ *  @property {number} ratingValue - The rating value.
+ *  @property {number} levenshteinScore - The computed Levenshtein distance between the query and the anime title.
+ *  @property {string} referenceUrl - The URL to the anime's detail page on Letterboxd.
+ * 
+ * @throws {Error} If the HTTP response is not successful.
+ */
 function getLetterboxdRatingAndImage(url) {
     return new Promise((resolve, reject) => {
         const fetchOptions = {
