@@ -148,3 +148,20 @@ function extractHboMaxNameFromButton(text) {
     const splitText = text.split(' ');
     return splitText.slice(1, -3).join(' ');
 }
+
+function updateLanguageForTab(tabId) {
+    chrome.tabs.detectLanguage(tabId).then((language) => {
+        console.log(`The current language is: ${language}`);
+        chrome.storage.local.set({ language: language }, () => { });
+    });
+}
+
+chrome.tabs.onActivated.addListener((activeInfo) => {
+    updateLanguageForTab(activeInfo.tabId);
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.active) {
+        updateLanguageForTab(tabId);
+    }
+});
