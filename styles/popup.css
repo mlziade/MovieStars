@@ -58,7 +58,7 @@ div #letterboxd-rating:hover {
     margin: 3px 0px 0px 0px;
 }
 
-#poster-imdb, #poster-mal {
+#poster-imdb, #poster-mal, #poster-letterboxd {
     width: auto;
     height: 300px;
     border: 1px solid #4f4f4fa0;
@@ -147,7 +147,7 @@ footer img {
     margin: 0px 0px 0px 0px;
 }
 
-#title-provider-imdb, #title-provider-mal {
+#title-provider-imdb, #title-provider-mal, #title-provider-letterboxd {
     text-align: center;
     margin: 0px 0px 0px 0px;
 }

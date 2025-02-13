@@ -261,6 +261,52 @@ function queryImdb(query) {
     })
 };
 
+function getLetterboxdRatingAndImage(url) {
+    return new Promise((resolve, reject) => {
+        const fetchOptions = {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            }
+        };
+
+        fetch(url, fetchOptions)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error while fetching content of ${url} ` + response.status);
+                }
+                return response.text();
+            })
+            .then(html => {
+                // Extract the image URL
+                const regexImage = /"image"\s*:\s*"([^"]+)"/;
+                const urlImages = html.match(regexImage);
+
+                // Extract the rating value
+                const regexRating = /"ratingValue"\s*:\s*([\d.]+)/;
+                const ratingValue = html.match(regexRating);
+
+                if (ratingValue && urlImages) {
+                    const resultData = {
+                        imageUrl: urlImages[1],
+                        ratingValue: parseFloat(ratingValue[1]),
+                    };
+                    resolve(resultData);
+                } else {
+                    const resultData = {
+                        imageUrl: null,
+                        ratingValue: null,
+                    };
+                    resolve(resultData);
+                }
+            })
+            .catch(error => {
+                reject(error);
+            });
+    });
+}
+
+
 function queryLetterboxd(query) {
     return new Promise((resolve, reject) => {
         const finalUrl = `https://www.letterboxd.com/s/search/${query}/?__csrf=804700fc55592152ef82`;
@@ -315,6 +361,17 @@ function queryLetterboxd(query) {
                 // Find the best match based on the lowest levenshtein score
                 const bestMatch = queryResult.animes.filter(anime => anime.levenshteinScore === Math.min(...queryResult.animes.map(anime => anime.levenshteinScore)))[0];
 
+                // Get the Letterboxd rating and image of the best match and update the best match object
+                getLetterboxdRatingAndImage(bestMatch.referenceUrl).then((result) => {
+                    const scoreFormatted = result.ratingValue ? parseFloat(result.ratingValue).toFixed(2) : "N/A";
+                    bestMatch.score = scoreFormatted;
+                    bestMatch.image = result.imageUrl;
+                }).catch((error) => {
+                    console.error(error);
+                    reject(error);
+                });
+
+                console.log("Best match:", bestMatch);
                 resolve(bestMatch);
             }
             )
@@ -358,46 +415,98 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('poster-mal').src = posterMal;
         }
 
+        // Update Letterboxd poster source
+        const posterLetterboxd = letterboxdData ? letterboxdData.image : null;
+        if (posterLetterboxd) {
+            document.getElementById('poster-letterboxd').src = posterLetterboxd;
+        }
+
         // Update the posters and "carrousel" dots visibility based on the data availability
-        if (posterImdb && posterMal) {
+        if (posterImdb && posterMal && posterLetterboxd) {
+            // All three posters available
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
+            document.getElementById('poster-letterboxd').style.display = 'none';
+            // Update the title provider
+            document.getElementById('title-provider-imdb').textContent = imdbData.title;
+            document.getElementById('title-provider-mal').textContent = malData.title;
+            document.getElementById('title-provider-letterboxd').textContent = letterboxdData.title;
+            document.getElementById('title-provider-imdb').style.display = 'block';
+            document.getElementById('title-provider-mal').style.display = 'none';
+            document.getElementById('title-provider-letterboxd').style.display = 'none';
+        } else if (posterImdb && posterMal && !posterLetterboxd) {
+            // IMDb and MAL available
+            document.getElementById('poster-imdb').style.display = 'block';
+            document.getElementById('poster-mal').style.display = 'none';
+            document.getElementById('poster-letterboxd').style.display = 'none';
             // Update the title provider
             document.getElementById('title-provider-imdb').textContent = imdbData.title;
             document.getElementById('title-provider-mal').textContent = malData.title;
             document.getElementById('title-provider-imdb').style.display = 'block';
             document.getElementById('title-provider-mal').style.display = 'none';
-        } else if (posterImdb && !posterMal) {
-            // Hide the MAL poster and show the IMDb poster
+            document.getElementById('title-provider-letterboxd').style.display = 'none';
+        } else if (posterImdb && !posterMal && posterLetterboxd) {
+            // IMDb and Letterboxd available
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
+            document.getElementById('poster-letterboxd').style.display = 'none';
             // Update the title provider
             document.getElementById('title-provider-imdb').textContent = imdbData.title;
+            document.getElementById('title-provider-letterboxd').textContent = letterboxdData.title;
+            document.getElementById('title-provider-imdb').style.display = 'block';
             document.getElementById('title-provider-mal').style.display = 'none';
-            // Hide the carrousel dots
-            document.getElementById('poster-dot-1').style.display = 'none';
-            document.getElementById('poster-dot-2').style.display = 'none';
-        } else if (!posterImdb && posterMal) {
-            // Hide the IMDb poster and show the MAL poster
+            document.getElementById('title-provider-letterboxd').style.display = 'none';
+        } else if (!posterImdb && posterMal && posterLetterboxd) {
+            // MAL and Letterboxd available
             document.getElementById('poster-imdb').style.display = 'none';
             document.getElementById('poster-mal').style.display = 'block';
+            document.getElementById('poster-letterboxd').style.display = 'none';
+            // Update the title provider
+            document.getElementById('title-provider-mal').textContent = malData.title;
+            document.getElementById('title-provider-letterboxd').textContent = letterboxdData.title;
+            document.getElementById('title-provider-imdb').style.display = 'none';
+            document.getElementById('title-provider-mal').style.display = 'block';
+            document.getElementById('title-provider-letterboxd').style.display = 'none';
+        } else if (posterImdb && !posterMal && !posterLetterboxd) {
+            // Only IMDb available
+            document.getElementById('poster-imdb').style.display = 'block';
+            document.getElementById('poster-mal').style.display = 'none';
+            document.getElementById('poster-letterboxd').style.display = 'none';
+            // Update the title provider
+            document.getElementById('title-provider-imdb').textContent = imdbData.title;
+            document.getElementById('title-provider-imdb').style.display = 'block';
+            document.getElementById('title-provider-mal').style.display = 'none';
+            document.getElementById('title-provider-letterboxd').style.display = 'none';
+        } else if (!posterImdb && posterMal && !posterLetterboxd) {
+            // Only MAL available
+            document.getElementById('poster-imdb').style.display = 'none';
+            document.getElementById('poster-mal').style.display = 'block';
+            document.getElementById('poster-letterboxd').style.display = 'none';
             // Update the title provider
             document.getElementById('title-provider-mal').textContent = malData.title;
             document.getElementById('title-provider-imdb').style.display = 'none';
-            // Hide the carrousel dots
-            document.getElementById('poster-dot-1').style.display = 'none';
-            document.getElementById('poster-dot-2').style.display = 'none';
-        } else {
-            // If no poster is available, show the default poster
-            document.getElementById('poster-imdb').style.src = '../assets/default-poster.svg';
-            document.getElementById('poster-imdb').style.display = 'block';
+            document.getElementById('title-provider-mal').style.display = 'block';
+            document.getElementById('title-provider-letterboxd').style.display = 'none';
+        } else if (!posterImdb && !posterMal && posterLetterboxd) {
+            // Only Letterboxd available
+            document.getElementById('poster-imdb').style.display = 'none';
             document.getElementById('poster-mal').style.display = 'none';
-            // Hide the carrousel dots
-            document.getElementById('poster-dot-1').style.display = 'none';
-            document.getElementById('poster-dot-2').style.display = 'none';
-            // Hide Title provided by
+            document.getElementById('poster-letterboxd').style.display = 'block';
+            // Update the title provider
+            document.getElementById('title-provider-letterboxd').textContent = letterboxdData.title;
             document.getElementById('title-provider-imdb').style.display = 'none';
             document.getElementById('title-provider-mal').style.display = 'none';
+            document.getElementById('title-provider-letterboxd').style.display = 'block';
+        } else {
+            // If no poster is available, show the default poster
+            document.getElementById('poster-imdb').src = '../assets/default-poster.svg';
+            document.getElementById('poster-imdb').style.display = 'block';
+            document.getElementById('poster-mal').style.display = 'none';
+            document.getElementById('poster-letterboxd').style.display = 'none';
+            // Hide Title provided by elements
+            document.getElementById('title-provider-imdb').style.display = 'none';
+            document.getElementById('title-provider-mal').style.display = 'none';
+            document.getElementById('title-provider-letterboxd').style.display = 'none';
         }
     }
 
@@ -454,21 +563,34 @@ document.addEventListener('DOMContentLoaded', function () {
         const malButton = document.getElementById('mal-rating');
         const letterboxdButton = document.getElementById('letterboxd-rating');
         imdbButton.addEventListener('click', function () {
-            // Show the IMDb poster and hide the MAL poster
+            // Show the IMDb poster and hide the MAL and Letterboxd posters
             document.getElementById('poster-imdb').style.display = 'block';
             document.getElementById('poster-mal').style.display = 'none';
+            document.getElementById('poster-letterboxd').style.display = 'none';
+            // Show the IMDb title provider and hide the MAL and Letterboxd title providers
             document.getElementById('title-provider-imdb').style.display = 'block';
             document.getElementById('title-provider-mal').style.display = 'none';
+            document.getElementById('title-provider-letterboxd').style.display = 'none';
         });
         malButton.addEventListener('click', function () {
-            // Show the IMDb poster and hide the MAL poster
+            // Show the MAL poster and hide the IMDb and Letterboxd posters
             document.getElementById('poster-imdb').style.display = 'none';
             document.getElementById('poster-mal').style.display = 'block';
+            document.getElementById('poster-letterboxd').style.display = 'none';
+            // Show the MAL title provider and hide the IMDb and Letterboxd title providers
             document.getElementById('title-provider-imdb').style.display = 'none';
             document.getElementById('title-provider-mal').style.display = 'block';
+            document.getElementById('title-provider-letterboxd').style.display = 'none';
         });
         letterboxdButton.addEventListener('click', function () {
-            // ToDo: Show the Letterboxd poster and hide the IMDb and MAL posters
+            // Show the Letterboxd poster and hide the IMDb and MAL posters
+            document.getElementById('poster-imdb').style.display = 'none';
+            document.getElementById('poster-mal').style.display = 'none';
+            document.getElementById('poster-letterboxd').style.display = 'block';
+            // Show the Letterboxd title provider and hide the IMDb and MAL title providers
+            document.getElementById('title-provider-imdb').style.display = 'none';
+            document.getElementById('title-provider-mal').style.display = 'none';
+            document.getElementById('title-provider-letterboxd').style.display = 'block';
         });
     });
 });
