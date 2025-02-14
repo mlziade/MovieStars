@@ -39,6 +39,146 @@ function levenshteinDistance(stringA, stringB) {
 }
 
 /**
+ * Calculates the Jaro similarity between two strings.
+ *
+ * The function computes the Jaro distance for two input strings by identifying matching characters within
+ * a certain window (based on the lengths of the strings) and counting the number of matching characters and
+ * transpositions. The result is a score between 0.0 (no similarity) and 1.0 (exact match), where higher values indicate
+ * greater similarity.
+ *
+ * @param {string} s1 - The first string to compare.
+ * @param {string} s2 - The second string to compare.
+ * @returns {number} A similarity score between 0.0 and 1.0.
+ */
+function jairoDistance(s1, s2) {
+    // If the strings are equal
+    if (s1 === s2) {
+      return 1.0;
+    }
+  
+    // Length of two strings
+    const len1 = s1.length;
+    const len2 = s2.length;
+  
+    // Maximum distance up to which matching is allowed
+    const max_dist = Math.floor(Math.max(len1, len2) / 2) - 1;
+  
+    // Count of matches
+    let match = 0;
+  
+    // Hash for matches
+    const hash_s1 = Array(s1.length).fill(0);
+    const hash_s2 = Array(s1.length).fill(0);
+  
+    // Traverse through the first string
+    for (let i = 0; i < len1; i++) {
+      // Check if there is any match
+      for (
+        let j = Math.max(0, i - max_dist);
+        j < Math.min(len2, i + max_dist + 1);
+        j++
+      ) {
+        // If there is a match
+        if (s1[i] === s2[j] && hash_s2[j] === 0) {
+          hash_s1[i] = 1;
+          hash_s2[j] = 1;
+          match++;
+          break;
+        }
+      }
+    }
+  
+    // If there is no match
+    if (match === 0) return 0.0;
+  
+    // Number of transpositions
+    let t = 0;
+    let point = 0;
+  
+    // Count number of occurrences where two characters match but
+    // there is a third matched character in between the indices
+    for (let i = 0; i < len1; i++) {
+      if (hash_s1[i]) {
+        // Find the next matched character in second string
+        while (hash_s2[point] === 0) point++;
+  
+        if (s1[i] !== s2[point]) t++;
+        point++;
+      }
+    }
+  
+    t /= 2;
+  
+    // Return the Jaro Similarity
+    return (match / len1 + match / len2 + (match - t) / match) / 3.0;
+}
+
+/**
+ * Generates a map of n-grams and their frequencies from a given string.
+ *
+ * @param {string} str - The string from which to extract n-grams.
+ * @param {number} n - The length of each n-gram.
+ * @returns {Map<string, number>} A map where the keys are n-grams and the values are their frequency counts.
+ */
+function getNGrams(str, n = 3) {
+    const ngrams = new Map();
+    str = str.toLowerCase().replace(/\s+/g, ' '); // Normalize spaces
+
+    for (let i = 0; i <= str.length - n; i++) {
+        const gram = str.substring(i, i + n);
+        ngrams.set(gram, (ngrams.get(gram) || 0) + 1);
+    }
+
+    return ngrams;
+}
+
+/**
+ * Calculates the cosine similarity between two strings based on the frequency of their n-grams.
+ *
+ * @param {string} str1 - The first string to compare.
+ * @param {string} str2 - The second string to compare.
+ * @param {number} [n=3] - The size of the n-grams to generate. Defaults to 3.
+ * @returns {number} The cosine similarity score, a value from 0 to 1.
+ */
+function cosineSimilarity(str1, str2, n = 3) {
+    const ngrams1 = getNGrams(str1, n);
+    const ngrams2 = getNGrams(str2, n);
+
+    const allKeys = new Set([...ngrams1.keys(), ...ngrams2.keys()]);
+
+    let dotProduct = 0, norm1 = 0, norm2 = 0;
+
+    for (let key of allKeys) {
+        const freq1 = ngrams1.get(key) || 0;
+        const freq2 = ngrams2.get(key) || 0;
+        
+        dotProduct += freq1 * freq2;
+        norm1 += freq1 ** 2;
+        norm2 += freq2 ** 2;
+    }
+
+    return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2) || 1); // Avoid division by zero
+}
+
+function finalSimilarity(str1, str2) {
+    // Levenshtein distance score (normalized) 0 to 1
+    const levenshteinScore = levenshteinDistance(str1, str2);
+    const lev = 1 - (levenshteinScore / Math.max(str1.length, str2.length));
+
+    const jairoScore = jairoDistance(str1, str2);
+    const cosineScore = cosineSimilarity(str1, str2);
+
+    const alpha = 0.4, beta = 0.3, gamma = 0.3; // Weights
+
+    return {
+        similarityScore: (alpha * lev) + (beta * jairoScore) + (gamma * cosineScore),
+        levenshteinScore: lev,
+        jairoScore,
+        cosineScore,
+    }
+}
+
+/**
  * Queries MyAnimeList for anime entries that match the provided query string.
  *
  * @param {string} query - The search query used to find matching anime titles.
@@ -94,17 +234,22 @@ function queryMyAnimeList(query) {
                         continue;
                     }
 
+                    const resultSimilarity = finalSimilarity(query, title);
+
                     queryResult.animes.push({
                         title,
                         image: imageUrl,
                         score: scoreFormatted,
-                        levenshteinScore: levenshteinDistance(query, title),
+                        levenshteinScore: resultSimilarity.levenshteinScore,
+                        jairoScore: resultSimilarity.jairoScore,
+                        cosineScore: resultSimilarity.cosineScore,
+                        similarityScore: resultSimilarity.similarityScore,
                         referenceUrl: animeListDivs[i].querySelector(".title a")?.getAttribute("href"),
                     });
                 }
 
-                // Find the best match based on the lowest levenshtein score
-                const bestMatch = queryResult.animes.filter(anime => anime.levenshteinScore === Math.min(...queryResult.animes.map(anime => anime.levenshteinScore)))[0];
+                // Find the best match based on the highest similarity score
+                const bestMatch = queryResult.animes.filter(anime => anime.similarityScore === Math.max(...queryResult.animes.map(anime => anime.similarityScore)))[0];
 
                 resolve(bestMatch);
             })
@@ -165,7 +310,7 @@ function getImdbRating(id) {
                         ratingValue: null,
                     };
                     resolve(ratingData);
-                    console.log("Rating data not found for IMDb ID:", id);
+                    // console.log("Rating data not found for IMDb ID:", id);
                 }
             })
             .catch(error => {
@@ -230,18 +375,23 @@ function queryImdb(query) {
                         continue;
                     }
 
+                    const resultSimilarity = finalSimilarity(query, title);
+
                     queryResult.animes.push({
                         id,
                         title,
                         image,
                         score,
-                        levenshteinScore: levenshteinDistance(query, title),
+                        levenshteinScore: resultSimilarity.levenshteinScore,
+                        jairoScore: resultSimilarity.jairoScore,
+                        cosineScore: resultSimilarity.cosineScore,
+                        similarityScore: resultSimilarity.similarityScore,
                         referenceUrl: `https://www.imdb.com/title/${id}/`,
                     });
                 }
 
-                // Find the best match based on the lowest levenshtein score
-                const bestMatch = queryResult.animes.filter(anime => anime.levenshteinScore === Math.min(...queryResult.animes.map(anime => anime.levenshteinScore)))[0];
+                // Find the best match based on the highest similarity score
+                const bestMatch = queryResult.animes.filter(anime => anime.similarityScore === Math.max(...queryResult.animes.map(anime => anime.similarityScore)))[0];
 
                 // Get the IMDB rating of the best match
                 getImdbRating(bestMatch.id).then((rating) => {
@@ -383,17 +533,22 @@ function queryLetterboxd(query) {
                         continue;
                     }
 
+                    const resultSimilarity = finalSimilarity(query, title);
+
                     queryResult.animes.push({
                         title,
                         image: "",
                         score: "N/A",
-                        levenshteinScore: levenshteinDistance(query, title),
+                        levenshteinScore: resultSimilarity.levenshteinScore,
+                        jairoScore: resultSimilarity.jairoScore,
+                        cosineScore: resultSimilarity.cosineScore,
+                        similarityScore: resultSimilarity.similarityScore,
                         referenceUrl: `https://www.letterboxd.com${referenceUrl}`,
                     });
                 }
 
-                // Find the best match based on the lowest levenshtein score
-                const bestMatch = queryResult.animes.filter(anime => anime.levenshteinScore === Math.min(...queryResult.animes.map(anime => anime.levenshteinScore)))[0];
+                // Find the best match based on the highest similarity score
+                const bestMatch = queryResult.animes.filter(anime => anime.similarityScore === Math.max(...queryResult.animes.map(anime => anime.similarityScore)))[0];
 
                 // Get the Letterboxd rating and image of the best match and update the best match object
                 getLetterboxdRatingAndImage(bestMatch.referenceUrl).then((result) => {
@@ -405,7 +560,6 @@ function queryLetterboxd(query) {
                     reject(error);
                 });
 
-                console.log("Best match:", bestMatch);
                 resolve(bestMatch);
             }
             )
