@@ -160,6 +160,24 @@ function cosineSimilarity(str1, str2, n = 3) {
     return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2) || 1); // Avoid division by zero
 }
 
+function finalSimilarity(str1, str2) {
+    // Levenshtein distance score (normalized) 0 to 1
+    const levenshteinScore = levenshteinDistance(str1, str2);
+    const lev = 1 - (levenshteinScore / Math.max(str1.length, str2.length));
+
+    const jairoScore = jairoDistance(str1, str2);
+    const cosineScore = cosineSimilarity(str1, str2);
+
+    const alpha = 0.4, beta = 0.3, gamma = 0.3; // Weights
+
+    return {
+        similarityScore: (alpha * lev) + (beta * jairoScore) + (gamma * cosineScore),
+        levenshteinScore: lev,
+        jairoScore,
+        cosineScore,
+    }
+}
+
 /**
  * Queries MyAnimeList for anime entries that match the provided query string.
  *
@@ -216,17 +234,22 @@ function queryMyAnimeList(query) {
                         continue;
                     }
 
+                    const resultSimilarity = finalSimilarity(query, title);
+
                     queryResult.animes.push({
                         title,
                         image: imageUrl,
                         score: scoreFormatted,
-                        levenshteinScore: levenshteinDistance(query, title),
+                        levenshteinScore: resultSimilarity.levenshteinScore,
+                        jairoScore: resultSimilarity.jairoScore,
+                        cosineScore: resultSimilarity.cosineScore,
+                        similarityScore: resultSimilarity.similarityScore,
                         referenceUrl: animeListDivs[i].querySelector(".title a")?.getAttribute("href"),
                     });
                 }
 
-                // Find the best match based on the lowest levenshtein score
-                const bestMatch = queryResult.animes.filter(anime => anime.levenshteinScore === Math.min(...queryResult.animes.map(anime => anime.levenshteinScore)))[0];
+                // Find the best match based on the highest similarity score
+                const bestMatch = queryResult.animes.filter(anime => anime.similarityScore === Math.max(...queryResult.animes.map(anime => anime.similarityScore)))[0];
 
                 resolve(bestMatch);
             })
@@ -287,7 +310,7 @@ function getImdbRating(id) {
                         ratingValue: null,
                     };
                     resolve(ratingData);
-                    console.log("Rating data not found for IMDb ID:", id);
+                    // console.log("Rating data not found for IMDb ID:", id);
                 }
             })
             .catch(error => {
@@ -352,18 +375,23 @@ function queryImdb(query) {
                         continue;
                     }
 
+                    const resultSimilarity = finalSimilarity(query, title);
+
                     queryResult.animes.push({
                         id,
                         title,
                         image,
                         score,
-                        levenshteinScore: levenshteinDistance(query, title),
+                        levenshteinScore: resultSimilarity.levenshteinScore,
+                        jairoScore: resultSimilarity.jairoScore,
+                        cosineScore: resultSimilarity.cosineScore,
+                        similarityScore: resultSimilarity.similarityScore,
                         referenceUrl: `https://www.imdb.com/title/${id}/`,
                     });
                 }
 
-                // Find the best match based on the lowest levenshtein score
-                const bestMatch = queryResult.animes.filter(anime => anime.levenshteinScore === Math.min(...queryResult.animes.map(anime => anime.levenshteinScore)))[0];
+                // Find the best match based on the highest similarity score
+                const bestMatch = queryResult.animes.filter(anime => anime.similarityScore === Math.max(...queryResult.animes.map(anime => anime.similarityScore)))[0];
 
                 // Get the IMDB rating of the best match
                 getImdbRating(bestMatch.id).then((rating) => {
@@ -505,17 +533,22 @@ function queryLetterboxd(query) {
                         continue;
                     }
 
+                    const resultSimilarity = finalSimilarity(query, title);
+
                     queryResult.animes.push({
                         title,
                         image: "",
                         score: "N/A",
-                        levenshteinScore: levenshteinDistance(query, title),
+                        levenshteinScore: resultSimilarity.levenshteinScore,
+                        jairoScore: resultSimilarity.jairoScore,
+                        cosineScore: resultSimilarity.cosineScore,
+                        similarityScore: resultSimilarity.similarityScore,
                         referenceUrl: `https://www.letterboxd.com${referenceUrl}`,
                     });
                 }
 
-                // Find the best match based on the lowest levenshtein score
-                const bestMatch = queryResult.animes.filter(anime => anime.levenshteinScore === Math.min(...queryResult.animes.map(anime => anime.levenshteinScore)))[0];
+                // Find the best match based on the highest similarity score
+                const bestMatch = queryResult.animes.filter(anime => anime.similarityScore === Math.max(...queryResult.animes.map(anime => anime.similarityScore)))[0];
 
                 // Get the Letterboxd rating and image of the best match and update the best match object
                 getLetterboxdRatingAndImage(bestMatch.referenceUrl).then((result) => {
@@ -527,7 +560,6 @@ function queryLetterboxd(query) {
                     reject(error);
                 });
 
-                console.log("Best match:", bestMatch);
                 resolve(bestMatch);
             }
             )
