@@ -114,6 +114,53 @@ function jairoDistance(s1, s2) {
 }
 
 /**
+ * Generates a map of n-grams and their frequencies from a given string.
+ *
+ * @param {string} str - The string from which to extract n-grams.
+ * @param {number} n - The length of each n-gram.
+ * @returns {Map<string, number>} A map where the keys are n-grams and the values are their frequency counts.
+ */
+function getNGrams(str, n = 3) {
+    const ngrams = new Map();
+    str = str.toLowerCase().replace(/\s+/g, ' '); // Normalize spaces
+
+    for (let i = 0; i <= str.length - n; i++) {
+        const gram = str.substring(i, i + n);
+        ngrams.set(gram, (ngrams.get(gram) || 0) + 1);
+    }
+
+    return ngrams;
+}
+
+/**
+ * Calculates the cosine similarity between two strings based on the frequency of their n-grams.
+ *
+ * @param {string} str1 - The first string to compare.
+ * @param {string} str2 - The second string to compare.
+ * @param {number} [n=3] - The size of the n-grams to generate. Defaults to 3.
+ * @returns {number} The cosine similarity score, a value from 0 to 1.
+ */
+function cosineSimilarity(str1, str2, n = 3) {
+    const ngrams1 = getNGrams(str1, n);
+    const ngrams2 = getNGrams(str2, n);
+
+    const allKeys = new Set([...ngrams1.keys(), ...ngrams2.keys()]);
+
+    let dotProduct = 0, norm1 = 0, norm2 = 0;
+
+    for (let key of allKeys) {
+        const freq1 = ngrams1.get(key) || 0;
+        const freq2 = ngrams2.get(key) || 0;
+        
+        dotProduct += freq1 * freq2;
+        norm1 += freq1 ** 2;
+        norm2 += freq2 ** 2;
+    }
+
+    return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2) || 1); // Avoid division by zero
+}
+
+/**
  * Queries MyAnimeList for anime entries that match the provided query string.
  *
  * @param {string} query - The search query used to find matching anime titles.
