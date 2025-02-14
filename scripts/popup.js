@@ -39,6 +39,81 @@ function levenshteinDistance(stringA, stringB) {
 }
 
 /**
+ * Calculates the Jaro similarity between two strings.
+ *
+ * The function computes the Jaro distance for two input strings by identifying matching characters within
+ * a certain window (based on the lengths of the strings) and counting the number of matching characters and
+ * transpositions. The result is a score between 0.0 (no similarity) and 1.0 (exact match), where higher values indicate
+ * greater similarity.
+ *
+ * @param {string} s1 - The first string to compare.
+ * @param {string} s2 - The second string to compare.
+ * @returns {number} A similarity score between 0.0 and 1.0.
+ */
+function jairoDistance(s1, s2) {
+    // If the strings are equal
+    if (s1 === s2) {
+      return 1.0;
+    }
+  
+    // Length of two strings
+    const len1 = s1.length;
+    const len2 = s2.length;
+  
+    // Maximum distance up to which matching is allowed
+    const max_dist = Math.floor(Math.max(len1, len2) / 2) - 1;
+  
+    // Count of matches
+    let match = 0;
+  
+    // Hash for matches
+    const hash_s1 = Array(s1.length).fill(0);
+    const hash_s2 = Array(s1.length).fill(0);
+  
+    // Traverse through the first string
+    for (let i = 0; i < len1; i++) {
+      // Check if there is any match
+      for (
+        let j = Math.max(0, i - max_dist);
+        j < Math.min(len2, i + max_dist + 1);
+        j++
+      ) {
+        // If there is a match
+        if (s1[i] === s2[j] && hash_s2[j] === 0) {
+          hash_s1[i] = 1;
+          hash_s2[j] = 1;
+          match++;
+          break;
+        }
+      }
+    }
+  
+    // If there is no match
+    if (match === 0) return 0.0;
+  
+    // Number of transpositions
+    let t = 0;
+    let point = 0;
+  
+    // Count number of occurrences where two characters match but
+    // there is a third matched character in between the indices
+    for (let i = 0; i < len1; i++) {
+      if (hash_s1[i]) {
+        // Find the next matched character in second string
+        while (hash_s2[point] === 0) point++;
+  
+        if (s1[i] !== s2[point]) t++;
+        point++;
+      }
+    }
+  
+    t /= 2;
+  
+    // Return the Jaro Similarity
+    return (match / len1 + match / len2 + (match - t) / match) / 3.0;
+}
+
+/**
  * Queries MyAnimeList for anime entries that match the provided query string.
  *
  * @param {string} query - The search query used to find matching anime titles.
